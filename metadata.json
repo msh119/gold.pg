@@ -1,0 +1,10 @@
+{
+  "name": "Remix: Pyramids Gold",
+  "description": "منصة بيراميدز جولد الاحترافية لتحييف وتسعير الذهب عيار 21 وحساب القيمة المالية.",
+  "requestFramePermissions": [
+    "display-capture"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
