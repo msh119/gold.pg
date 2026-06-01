@@ -6,9 +6,12 @@ import { Calculator } from './components/Calculator';
 import { Settings } from './components/Settings';
 import { SystemInfo } from './components/SystemInfo';
 import { HomeDashboard } from './components/HomeDashboard';
-import { ActiveTab, GoldPrices, Language, HistoryItem } from './types';
+import { FloatingCaratCard } from './components/FloatingCaratCard';
+import { BottomMarketTicker } from './components/BottomMarketTicker';
+import { ActiveTab, GoldPrices, Language, HistoryItem, TickerSettings } from './types';
 import { translations } from './utils/translations';
 import { motion, AnimatePresence } from 'motion/react';
+
 
 // Default standard Egyptian pricing averages if none saved in localStorage
 const DEFAULT_PRICES: GoldPrices = {
@@ -16,6 +19,23 @@ const DEFAULT_PRICES: GoldPrices = {
   g21: 3675,
   g18: 3150,
 };
+
+// Default currencies exchange and live market data values
+const DEFAULT_TICKER_SETTINGS: TickerSettings = {
+  mode: 'auto',
+  usdRateBuy: 49.65,
+  usdRateSell: 49.75,
+  eurRateBuy: 53.40,
+  eurRateSell: 53.52,
+  sarRateBuy: 13.24,
+  sarRateSell: 13.27,
+  aedRateBuy: 13.51,
+  aedRateSell: 13.55,
+  kwdRateBuy: 161.42,
+  kwdRateSell: 162.10,
+  globalGoldOunce: 2435,
+};
+
 
 export default function App() {
   // Safe load of prices
@@ -42,8 +62,153 @@ export default function App() {
     return 'ar';
   });
 
+  // Ticker settings state (auto internet sync vs manual inputs)
+  const [tickerSettings, setTickerSettings] = useState<TickerSettings>(() => {
+    try {
+      const saved = localStorage.getItem('pyramids_ticker_settings');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error('Error loading ticker settings:', e);
+    }
+    return DEFAULT_TICKER_SETTINGS;
+  });
+
+  // Safe handler to update ticker configurations
+  const saveTickerSettings = (newSettings: TickerSettings) => {
+    setTickerSettings(newSettings);
+    try {
+      localStorage.setItem('pyramids_ticker_settings', JSON.stringify(newSettings));
+    } catch (e) {
+      console.error('Failed to save ticker settings:', e);
+    }
+  };
+
+  // Direct internet API live price fetcher routine (from free and open APIs)
+  const fetchLiveTickerData = async () => {
+    try {
+      // 1. Fetch live keyless exchange rates relative to USD (USD standard rates)
+      const res = await fetch('https://open.er-api.com/v6/latest/USD');
+      let loadedCurrencies: Partial<TickerSettings> = {};
+      let globalOunceVal = tickerSettings.globalGoldOunce;
+      let calculatedEgpRate = tickerSettings.usdRateSell;
+
+      if (res.ok) {
+        const data = await res.json();
+        calculatedEgpRate = data.rates.EGP || 49.75;
+        
+        const getRateInEgp = (code: string, fallback: number) => {
+          const rateToUsd = data.rates[code];
+          if (rateToUsd) {
+            return calculatedEgpRate / rateToUsd;
+          }
+          return fallback;
+        };
+
+        const usdVal = calculatedEgpRate;
+        const eurVal = getRateInEgp('EUR', 53.45);
+        const sarVal = getRateInEgp('SAR', 13.25);
+        const aedVal = getRateInEgp('AED', 13.53);
+        const kwdVal = getRateInEgp('KWD', 161.80);
+
+        if (data.rates.XAU) {
+          globalOunceVal = Math.round(1 / data.rates.XAU);
+        }
+
+        loadedCurrencies = {
+          usdRateBuy: Math.round(usdVal * 0.998 * 100) / 100,
+          usdRateSell: Math.round(usdVal * 1.002 * 100) / 100,
+          eurRateBuy: Math.round(eurVal * 0.998 * 100) / 100,
+          eurRateSell: Math.round(eurVal * 1.002 * 100) / 100,
+          sarRateBuy: Math.round(sarVal * 0.998 * 100) / 100,
+          sarRateSell: Math.round(sarVal * 1.002 * 100) / 100,
+          aedRateBuy: Math.round(aedVal * 0.998 * 100) / 100,
+          aedRateSell: Math.round(aedVal * 1.002 * 100) / 100,
+          kwdRateBuy: Math.round(kwdVal * 0.998 * 100) / 100,
+          kwdRateSell: Math.round(kwdVal * 1.002 * 100) / 100,
+        };
+      }
+
+      // 2. Fetch live gold rates using the preconfigured/saved Key via GoldAPI
+      const apiKey = localStorage.getItem('goldapi_key') || 'goldapi-d403eb25233852441e428c300695afdf-io';
+      const goldRes = await fetch('https://www.goldapi.io/api/XAU/EGP', {
+        headers: {
+          'x-access-token': apiKey.trim(),
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (goldRes.ok) {
+        const goldData = await goldRes.json();
+        let p24 = goldData.price_gram_24k;
+        let p21 = goldData.price_gram_21k;
+        let p18 = goldData.price_gram_18k;
+
+        if (!p24 && goldData.price) {
+          p24 = goldData.price / 31.1034768;
+        }
+
+        if (goldData.price && calculatedEgpRate) {
+          globalOunceVal = Math.round(goldData.price / (p24 ? (goldData.price_gram_24k ? goldData.price / p24 : calculatedEgpRate) : calculatedEgpRate) * 31.1034768);
+          // Standard estimation of golden ounce global value from Troy ounce directly
+          const ounceRes = await fetch('https://www.goldapi.io/api/XAU/USD', {
+            headers: { 'x-access-token': apiKey.trim() }
+          });
+          if (ounceRes.ok) {
+            const ounceData = await ounceRes.json();
+            if (ounceData.price) globalOunceVal = Math.round(ounceData.price);
+          }
+        }
+
+        if (p24) {
+          if (!p21) p21 = p24 * 0.875;
+          if (!p18) p18 = p24 * 0.75;
+
+          const r24 = Math.round(p24 * 100) / 100;
+          const r21 = Math.round(p21 * 100) / 100;
+          const r18 = Math.round(p18 * 100) / 100;
+
+          savePrices({
+            g24: r24,
+            g21: r21,
+            g18: r18
+          });
+        }
+      }
+
+      // Update ticker settings values
+      setTickerSettings(prev => {
+        const revised = {
+          ...prev,
+          ...loadedCurrencies,
+          globalGoldOunce: globalOunceVal ? globalOunceVal : prev.globalGoldOunce
+        };
+        try {
+          localStorage.setItem('pyramids_ticker_settings', JSON.stringify(revised));
+        } catch (e) {}
+        return revised;
+      });
+
+    } catch (err) {
+      console.error('Failed to sync direct live metrics: ', err);
+    }
+  };
+
+  // Safe side effect to periodically sync live metrics
+  useEffect(() => {
+    if (tickerSettings.mode === 'auto') {
+      fetchLiveTickerData();
+      const runInterval = setInterval(() => {
+        fetchLiveTickerData();
+      }, 300000); // refresh every 5 mins
+      return () => clearInterval(runInterval);
+    }
+  }, [tickerSettings.mode]);
+
   // Active navigation tab
   const [activeTab, setActiveTab ] = useState<ActiveTab>('home');
+
 
   // Calculation calibration history log records
   const [history, setHistory] = useState<HistoryItem[]>(() => {
@@ -115,6 +280,11 @@ export default function App() {
     document.documentElement.lang = language;
   }, [language]);
 
+  // Scroll to top of the page when active tab changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeTab]);
+
   const renderActiveSection = () => {
     switch (activeTab) {
       case 'home':
@@ -145,8 +315,12 @@ export default function App() {
             prices={prices}
             savePrices={savePrices}
             language={language}
+            tickerSettings={tickerSettings}
+            saveTickerSettings={saveTickerSettings}
+            fetchLiveTickerData={fetchLiveTickerData}
           />
         );
+
       case 'info':
         return <SystemInfo language={language} prices={prices} history={history} />;
       default:
@@ -209,6 +383,13 @@ export default function App() {
         </main>
 
       </div>
+
+      {/* 🌟 LIVE 21K FLOATING CARAT CARD 🌟 */}
+      <FloatingCaratCard prices={prices} language={language} setActiveTab={setActiveTab} />
+
+      {/* 📊 LIVE GOLD & CURRENCY SCROLLING TICKER 📊 */}
+      <BottomMarketTicker prices={prices} language={language} tickerSettings={tickerSettings} />
+
 
       {/* 🚀 PREMIUM RESPONSIVE FLOATING BOTTOM BAR / DOCK 🚀 */}
       <div className="relative z-30">

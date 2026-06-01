@@ -26,3 +26,19 @@ export interface HistoryItem {
   pricePerGram21k: number;
   totalValue: number;
 }
+
+export interface TickerSettings {
+  mode: 'auto' | 'manual';
+  usdRateBuy: number;
+  usdRateSell: number;
+  eurRateBuy: number;
+  eurRateSell: number;
+  sarRateBuy: number;
+  sarRateSell: number;
+  aedRateBuy: number;
+  aedRateSell: number;
+  kwdRateBuy: number;
+  kwdRateSell: number;
+  globalGoldOunce: number;
+}
+

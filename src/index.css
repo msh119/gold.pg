@@ -70,3 +70,53 @@ body {
   background: var(--gold);
 }
 
+/* 🚀 INFINITE MARQUEE ANIMATIONS 🚀 */
+@keyframes marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes marquee-rtl {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(50%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 50s linear infinite;
+}
+
+.animate-marquee-rtl {
+  display: flex;
+  width: max-content;
+  animation: marquee-rtl 50s linear infinite;
+}
+
+.animate-marquee-fast {
+  display: flex;
+  width: max-content;
+  animation: marquee 45s linear infinite;
+}
+
+.animate-marquee-fast-rtl {
+  display: flex;
+  width: max-content;
+  animation: marquee-rtl 45s linear infinite;
+}
+
+.hover-pause:hover .animate-marquee,
+.hover-pause:hover .animate-marquee-rtl,
+.hover-pause:hover .animate-marquee-fast,
+.hover-pause:hover .animate-marquee-fast-rtl {
+  animation-play-state: paused;
+}
+

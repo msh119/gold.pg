@@ -62,29 +62,57 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Dynamic Price Ticker (Live synchronization) */}
-        <div className="hidden flex-1 items-center justify-center gap-6 px-4 md:flex">
-          <div className="flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.15)] bg-[#161616]/70 px-4 py-1.5 text-xs">
-            <span className="flex h-2 w-2 items-center justify-center">
+        {/* Dynamic Price Ticker (Live synchronization) - Now animated marquee with hover-pause */}
+        <div className="hidden flex-1 items-center justify-center px-4 md:flex overflow-hidden max-w-[380px] lg:max-w-[550px] xl:max-w-[700px]">
+          <div className="flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.15)] bg-[#111111]/90 px-4 py-1.5 text-xs overflow-hidden w-full hover-pause shadow-[inset_0_1px_4px_rgba(0,0,0,0.5)]">
+            <span className="flex h-2 w-2 items-center justify-center shrink-0 z-10 relative bg-[#111111] pr-1">
               <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
             </span>
-            <span className="text-neutral-400 font-bold">{t.tickerTitle}:</span>
+            <span className="text-neutral-400 font-black shrink-0 z-10 relative bg-[#111111] pr-2 pl-1 border-r border-neutral-800 text-[10px] uppercase tracking-wider">
+              {t.tickerTitle}:
+            </span>
             
-            <div className="flex items-center gap-4 ml-2">
-              <div className="flex items-center gap-1.5">
-                <span className="text-neutral-500 font-semibold">{t.g24}:</span>
-                <span className="font-mono font-bold text-amber-400">{getFormattedPrice(prices.g24)}</span>
-              </div>
-              <div className="h-3 w-px bg-neutral-800"></div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-neutral-500 font-semibold">{t.g21}:</span>
-                <span className="font-mono font-bold text-yellow-500">{getFormattedPrice(prices.g21)}</span>
-              </div>
-              <div className="h-3 w-px bg-neutral-800"></div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-neutral-500 font-semibold">{t.g18}:</span>
-                <span className="font-mono font-bold text-amber-600">{getFormattedPrice(prices.g18)}</span>
+            <div className="overflow-hidden relative w-full flex items-center h-5">
+              <div className={`flex gap-8 whitespace-nowrap items-center ${language === 'ar' ? 'animate-marquee-rtl' : 'animate-marquee'}`}>
+                {/* Loop 1 */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-neutral-400 font-semibold">{t.g24}:</span>
+                    <span className="font-mono font-black text-amber-400 bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10">{getFormattedPrice(prices.g24)}</span>
+                  </div>
+                  <div className="h-3 w-px bg-neutral-800"></div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-neutral-400 font-semibold">{t.g21}:</span>
+                    <span className="font-mono font-black text-yellow-500 bg-yellow-500/5 px-2 py-0.5 rounded border border-yellow-500/10">{getFormattedPrice(prices.g21)}</span>
+                  </div>
+                  <div className="h-3 w-px bg-neutral-800"></div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-neutral-400 font-semibold">{t.g18}:</span>
+                    <span className="font-mono font-black text-amber-600 bg-amber-600/5 px-2 py-0.5 rounded border border-amber-600/10">{getFormattedPrice(prices.g18)}</span>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="h-3 w-px bg-neutral-800/40"></div>
+
+                {/* Loop 2 */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-neutral-400 font-semibold">{t.g24}:</span>
+                    <span className="font-mono font-black text-amber-400 bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10">{getFormattedPrice(prices.g24)}</span>
+                  </div>
+                  <div className="h-3 w-px bg-neutral-800"></div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-neutral-400 font-semibold">{t.g21}:</span>
+                    <span className="font-mono font-black text-yellow-500 bg-yellow-500/5 px-2 py-0.5 rounded border border-yellow-500/10">{getFormattedPrice(prices.g21)}</span>
+                  </div>
+                  <div className="h-3 w-px bg-neutral-800"></div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-neutral-400 font-semibold">{t.g18}:</span>
+                    <span className="font-mono font-black text-amber-600 bg-amber-600/5 px-2 py-0.5 rounded border border-amber-600/10">{getFormattedPrice(prices.g18)}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -127,21 +155,48 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Embedded Mobile Ticker */}
-      <div className="flex border-t border-neutral-900 bg-black px-4 py-1.5 justify-around text-[10px] md:hidden">
-        <div className="flex items-center gap-1">
-          <span className="text-neutral-500">{t.g24}:</span>
-          <span className="font-mono font-extrabold text-amber-400">{getFormattedPrice(prices.g24)}</span>
-        </div>
-        <div className="h-3 w-px bg-neutral-900"></div>
-        <div className="flex items-center gap-1">
-          <span className="text-neutral-500">{t.g21}:</span>
-          <span className="font-mono font-extrabold text-yellow-500">{getFormattedPrice(prices.g21)}</span>
-        </div>
-        <div className="h-3 w-px bg-neutral-900"></div>
-        <div className="flex items-center gap-1">
-          <span className="text-neutral-500">{t.g18}:</span>
-          <span className="font-mono font-extrabold text-amber-600">{getFormattedPrice(prices.g18)}</span>
+      {/* Embedded Mobile Ticker - Beautifully animated marquee with hover-pause */}
+      <div className="overflow-hidden border-t border-neutral-900 bg-black py-2 text-[10px] md:hidden hover-pause">
+        <div className={`flex whitespace-nowrap items-center ${language === 'ar' ? 'animate-marquee-rtl' : 'animate-marquee'} gap-8`}>
+          {/* Group 1 */}
+          <div className="flex items-center gap-4">
+            <span className="text-neutral-400 font-bold uppercase tracking-wider">{t.tickerTitle}:</span>
+            <div className="flex items-center gap-1">
+              <span className="text-neutral-500">{t.g24}:</span>
+              <span className="font-mono font-extrabold text-amber-400">{getFormattedPrice(prices.g24)}</span>
+            </div>
+            <div className="h-2.5 w-px bg-neutral-800"></div>
+            <div className="flex items-center gap-1">
+              <span className="text-neutral-500">{t.g21}:</span>
+              <span className="font-mono font-extrabold text-yellow-500">{getFormattedPrice(prices.g21)}</span>
+            </div>
+            <div className="h-2.5 w-px bg-neutral-800"></div>
+            <div className="flex items-center gap-1">
+              <span className="text-neutral-500">{t.g18}:</span>
+              <span className="font-mono font-extrabold text-amber-600">{getFormattedPrice(prices.g18)}</span>
+            </div>
+          </div>
+
+          <div className="h-3 w-px bg-neutral-700/60"></div>
+
+          {/* Group 2 */}
+          <div className="flex items-center gap-4">
+            <span className="text-neutral-400 font-bold uppercase tracking-wider">{t.tickerTitle}:</span>
+            <div className="flex items-center gap-1">
+              <span className="text-neutral-500">{t.g24}:</span>
+              <span className="font-mono font-extrabold text-amber-400">{getFormattedPrice(prices.g24)}</span>
+            </div>
+            <div className="h-2.5 w-px bg-neutral-800"></div>
+            <div className="flex items-center gap-1">
+              <span className="text-neutral-500">{t.g21}:</span>
+              <span className="font-mono font-extrabold text-yellow-500">{getFormattedPrice(prices.g21)}</span>
+            </div>
+            <div className="h-2.5 w-px bg-neutral-800"></div>
+            <div className="flex items-center gap-1">
+              <span className="text-neutral-500">{t.g18}:</span>
+              <span className="font-mono font-extrabold text-amber-600">{getFormattedPrice(prices.g18)}</span>
+            </div>
+          </div>
         </div>
       </div>
     </header>
