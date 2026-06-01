@@ -12,7 +12,6 @@ import { ActiveTab, GoldPrices, Language, HistoryItem, TickerSettings } from './
 import { translations } from './utils/translations';
 import { motion, AnimatePresence } from 'motion/react';
 
-
 // Default standard Egyptian pricing averages if none saved in localStorage
 const DEFAULT_PRICES: GoldPrices = {
   g24: 4200,
@@ -35,7 +34,6 @@ const DEFAULT_TICKER_SETTINGS: TickerSettings = {
   kwdRateSell: 162.10,
   globalGoldOunce: 2435,
 };
-
 
 export default function App() {
   // Safe load of prices

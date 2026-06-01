@@ -52,7 +52,6 @@ export const BottomMarketTicker: React.FC<BottomMarketTickerProps> = ({ prices, 
     { label: isAr ? '🌍 أوقية الذهب عالمياً' : '🌍 Gold Ounce Global', price: `$${tickerSettings.globalGoldOunce.toLocaleString(isAr ? 'ar-EG' : 'en-US')} USD` },
   ];
 
-
   return (
     <div className="fixed bottom-[74px] sm:bottom-[82px] left-0 right-0 z-40 bg-[#090909]/95 backdrop-blur-md border-y border-amber-500/15 py-2 text-[11px] font-mono select-none overflow-hidden shadow-[0_-8px_24px_rgba(0,0,0,0.8)]">
       <div className="hover-pause relative flex items-center w-full">
