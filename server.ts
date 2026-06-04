@@ -24,6 +24,17 @@ async function startServer() {
 
   app.use(express.json());
 
+  // Universal permissive CORS header support for security-isolated sandbox previews
+  app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, x-access-token");
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(200);
+    }
+    next();
+  });
+
   // API health check
   app.get("/api/health", (req, res) => {
     res.json({ status: "healthy" });

@@ -85,13 +85,13 @@ export default function App() {
 
   // Direct internet API live price fetcher routine (from free and open APIs)
   const fetchLiveTickerData = async () => {
-    try {
-      // 1. Fetch live keyless exchange rates relative to USD (USD standard rates)
-      const res = await fetch('https://open.er-api.com/v6/latest/USD');
-      let loadedCurrencies: Partial<TickerSettings> = {};
-      let globalOunceVal = tickerSettings.globalGoldOunce;
-      let calculatedEgpRate = tickerSettings.usdRateSell;
+    let loadedCurrencies: Partial<TickerSettings> = {};
+    let globalOunceVal = tickerSettings.globalGoldOunce;
+    let calculatedEgpRate = tickerSettings.usdRateSell;
 
+    // 1. Fetch live keyless exchange rates relative to USD (USD standard rates)
+    try {
+      const res = await fetch('https://open.er-api.com/v6/latest/USD');
       if (res.ok) {
         const data = await res.json();
         calculatedEgpRate = data.rates.EGP || 49.75;
@@ -127,8 +127,12 @@ export default function App() {
           kwdRateSell: Math.round(kwdVal * 1.002 * 100) / 100,
         };
       }
+    } catch (currencyErr) {
+      console.warn('Unable to sync standard currency conversion ratios:', currencyErr);
+    }
 
-      // 2. Fetch live gold rates using the preconfigured/saved Key via GoldAPI
+    // 2. Fetch live gold rates using the preconfigured/saved Key via GoldAPI (prone to CORS/Rate-limit failures)
+    try {
       const apiKey = localStorage.getItem('goldapi_key') || 'goldapi-d403eb25233852441e428c300695afdf-io';
       const goldRes = await fetch('https://www.goldapi.io/api/XAU/EGP', {
         headers: {
@@ -149,13 +153,17 @@ export default function App() {
 
         if (goldData.price && calculatedEgpRate) {
           globalOunceVal = Math.round(goldData.price / (p24 ? (goldData.price_gram_24k ? goldData.price / p24 : calculatedEgpRate) : calculatedEgpRate) * 31.1034768);
-          // Standard estimation of golden ounce global value from Troy ounce directly
-          const ounceRes = await fetch('https://www.goldapi.io/api/XAU/USD', {
-            headers: { 'x-access-token': apiKey.trim() }
-          });
-          if (ounceRes.ok) {
-            const ounceData = await ounceRes.json();
-            if (ounceData.price) globalOunceVal = Math.round(ounceData.price);
+          try {
+            // Standard estimation of golden ounce global value from Troy ounce directly
+            const ounceRes = await fetch('https://www.goldapi.io/api/XAU/USD', {
+              headers: { 'x-access-token': apiKey.trim() }
+            });
+            if (ounceRes.ok) {
+              const ounceData = await ounceRes.json();
+              if (ounceData.price) globalOunceVal = Math.round(ounceData.price);
+            }
+          } catch (ounceErr) {
+            // Nested error bypass
           }
         }
 
@@ -174,23 +182,22 @@ export default function App() {
           });
         }
       }
-
-      // Update ticker settings values
-      setTickerSettings(prev => {
-        const revised = {
-          ...prev,
-          ...loadedCurrencies,
-          globalGoldOunce: globalOunceVal ? globalOunceVal : prev.globalGoldOunce
-        };
-        try {
-          localStorage.setItem('pyramids_ticker_settings', JSON.stringify(revised));
-        } catch (e) {}
-        return revised;
-      });
-
-    } catch (err) {
-      console.error('Failed to sync direct live metrics: ', err);
+    } catch (goldApiErr) {
+      console.warn('Unable to retrieve direct GoldAPI pricing indices (using cache/server proxy fallback):', goldApiErr);
     }
+
+    // Update ticker settings values with any newly fetched or cached parameters safely
+    setTickerSettings(prev => {
+      const revised = {
+        ...prev,
+        ...loadedCurrencies,
+        globalGoldOunce: globalOunceVal ? globalOunceVal : prev.globalGoldOunce
+      };
+      try {
+        localStorage.setItem('pyramids_ticker_settings', JSON.stringify(revised));
+      } catch (e) {}
+      return revised;
+    });
   };
 
   // Safe side effect to periodically sync live metrics
@@ -318,7 +325,6 @@ export default function App() {
             fetchLiveTickerData={fetchLiveTickerData}
           />
         );
-
       case 'info':
         return <SystemInfo language={language} prices={prices} history={history} />;
       default:

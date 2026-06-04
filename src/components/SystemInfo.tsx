@@ -553,71 +553,141 @@ export const SystemInfo: React.FC<SystemInfoProps> = ({ language, prices, histor
         );
       })()}
 
-      {/* Elements Table Section */}
-      <div className="bento-card border border-neutral-850 bg-[#060709] relative overflow-hidden">
-        <div className="absolute top-0 left-0 -ml-16 -mt-16 h-36 w-36 rounded-full bg-amber-500/[0.02] blur-2xl pointer-events-none"></div>
-        <h3 className="text-xs font-bold text-[var(--gold)] uppercase tracking-widest font-mono mb-5 flex items-center gap-2 border-b border-neutral-900 pb-3">
-          <Sparkles className="h-4 w-4 text-amber-500" />
-          {language === 'ar' ? 'جدول الرموز والعناصر الكيميائية للمعادن' : 'CHEMICAL METAL ELEMENTS & SYMBOLS'}
-        </h3>
+      {/* 📊 DUAL GRID: CHEMICAL ELEMENTS & CARAT PURITIES/SHARES 📊 */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pb-4">
         
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs font-mono">
-            <thead>
-              <tr className="border-b border-neutral-850 text-neutral-500 text-[10px] uppercase font-bold">
-                <th className={`pb-3 text-neutral-500 font-bold ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                  {language === 'ar' ? 'العنصر بالعربية' : 'Element (Arabic)'}
-                </th>
-                <th className={`pb-3 text-neutral-500 font-bold ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                  {language === 'ar' ? 'العنصر بالإنجليزية' : 'Element (English)'}
-                </th>
-                <th className="pb-3 text-center text-neutral-500 font-bold">
-                  {language === 'ar' ? 'الرمز الكيميائي' : 'Chemical Symbol'}
-                </th>
-                <th className={`pb-3 text-neutral-500 font-bold ${language === 'ar' ? 'text-left font-sans' : 'text-right font-sans'}`}>
-                  {language === 'ar' ? 'الاستخدام بالصاغة والتبكير والشيشنة' : 'Primary Application'}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-900/60">
-              {[
-                { ar: 'الذهب', en: 'Gold', symbol: 'Au', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20', useAr: 'المعدن الثمين الأساسي للتداول والادخار ومعيار التسعير اللحظي بالصاغة في مصر بمؤشر 875', useEn: 'Primary financial index base for trading & savings standard' },
-                { ar: 'الفضة', en: 'Silver', symbol: 'Ag', color: 'text-slate-300 bg-slate-300/10 border-slate-300/20', useAr: 'معدن الخلط والمكمل للسبائك وخفض سهم الذهب للحصول للعيار المطلوب بدقة تامة', useEn: 'Pristine jewelry alloys, premium fineness calibration filler' },
-                { ar: 'البلاتين', en: 'Platinum', symbol: 'Pt', color: 'text-teal-300 bg-teal-300/10 border-teal-300/20', useAr: 'صناعة محترفي المجوهرات الملكية والفاخرة شديدة النقاوة والصلابة والعمر المديد', useEn: 'High-end luxury jewelry, extreme durability' },
-                { ar: 'البالاديوم', en: 'Palladium', symbol: 'Pd', color: 'text-indigo-300 bg-indigo-300/10 border-indigo-300/20', useAr: 'يدخل في صناعة سبائك الذهب الأبيض الفاخر وله رونق متين ومضاد للأكسدة والأحماض', useEn: 'White gold alloy manufacturing and hard coatings' },
-                { ar: 'النحاس', en: 'Copper', symbol: 'Cu', color: 'text-orange-400 bg-orange-500/10 border-orange-500/20', useAr: 'المضاف الأقوى لتصليد عيار 21 وسهم 875 وصناعة الذهب الأحمر والوردي الفخم وسهم الخلط الناري', useEn: 'Primary hardening additive for yellow and rose gold alloys' },
-                { ar: 'الرصاص', en: 'Lead', symbol: 'Pb', color: 'text-red-400 bg-red-500/10 border-red-500/20', useAr: 'عنصر مرسب ومجمع في تصفية المعادن الخام كيميائياً بالتثقيل وعزله تاماً لرفع جودة السهم ونقاء الذهب', useEn: 'Gathering agent in metallurgy crucible assaying' },
-                { ar: 'الروديوم', en: 'Rhodium', symbol: 'Rh', color: 'text-cyan-300 bg-cyan-300/10 border-cyan-300/20', useAr: 'معدن ثمين نادر جداً لطلاء غلاف الذهب الأبيض لصد الخدوش وعكس اللمعان البلاتيني الفاخر', useEn: 'Ultra-rare platinum group metal used for premium alloy shielding' },
-                { ar: 'التيتانيوم', en: 'Titanium', symbol: 'Ti', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', useAr: 'لصناعة المشغولات الطبية خفيفة الوزن وفائقة القوة والصمود ومقاومة التكلس والصدأ', useEn: 'Lightweight ultra-dense metal used in high-strength bespoke alloys' },
-                { ar: 'الكادميوم', en: 'Cadmium', symbol: 'Cd', color: 'text-yellow-600 bg-yellow-600/10 border-yellow-600/15', useAr: 'كان مستخدماً كـلحام ناعم للذهب لخفض درجة الانزلاق والذوبان وتم حظره حالياً في ورش الصاغة لضرره الصحي', useEn: 'Traditional solder material, widely deprecated due to health standards' },
-                { ar: 'الحديد', en: 'Iron', symbol: 'Fe', color: 'text-zinc-500 bg-zinc-500/10 border-zinc-500/20', useAr: 'عنصر شائب وعارض يتم التخلص منه بعملية الشيشنة والتصفيح ومقاومة الأكسدة والفرز بالمركبات', useEn: 'Trace metal separated or refined in assaying processes' },
-                { ar: 'الزنك', en: 'Zinc', symbol: 'Zn', color: 'text-blue-300 bg-blue-300/10 border-blue-300/10', useAr: 'يدخل بشكل أساسي لخفض درجة انصهار سبائك الذهب وعمل لحامات دقيقة ومصقولة', useEn: 'Solder agent, reducer of standard alloy melting point' },
-                { ar: 'النيكل', en: 'Nickel', symbol: 'Ni', color: 'text-purple-300 bg-purple-300/10 border-purple-300/10', useAr: 'يستخدم للحصول على تدرج الذهب الأبيض الفضي الفاخر والتصفيح المقاوم للمشغولات السطحية', useEn: 'White gold alloy catalyst and custom silver plating' },
-                { ar: 'الزئبق', en: 'Mercury', symbol: 'Hg', color: 'text-sky-400 bg-sky-500/10 border-sky-500/20', useAr: 'مستخلص ومذيب حراري في تعدين الذهب واستخلاص الذهب الخام بالملغمة ثم التبخير بالورش الحرفية', useEn: 'Traditional gold ore extraction catalyst and ancient hot mining solvent' },
-                { ar: 'الألومنيوم', en: 'Aluminum', symbol: 'Al', color: 'text-stone-300 bg-stone-300/10 border-stone-300/20', useAr: 'عنصر واقي وخافض للوزن الكلي يدخل في سبك قوالب صب العيار وهياكل معدات صهر المعادن الثمينة', useEn: 'Deoxidization component and structural assay crucible accessory' },
-              ].map((item, idx) => (
-                <tr key={idx} className="hover:bg-white/[0.01] transition-colors">
-                  <td className={`py-3.5 font-bold text-neutral-100 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                    {item.ar}
-                  </td>
-                  <td className={`py-3.5 font-semibold text-neutral-300 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                    {item.en}
-                  </td>
-                  <td className="py-3.5 text-center">
-                    <span className={`inline-block px-3 py-1 rounded-md text-[11px] font-black border uppercase tracking-wider font-mono ${item.color}`}>
-                      {item.symbol}
-                    </span>
-                  </td>
-                  <td className={`py-3.5 text-[10px] text-neutral-500 font-sans ${language === 'ar' ? 'text-right leading-relaxed font-sans' : 'text-left leading-relaxed font-sans'}`}>
-                    {language === 'ar' ? item.useAr : item.useEn}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* Left Side: Chemical Elements Table (7 cols) */}
+        <div className="lg:col-span-7 bento-card border border-neutral-850 bg-[#060709] relative overflow-hidden flex flex-col justify-between">
+          <div className="absolute top-0 left-0 -ml-16 -mt-16 h-36 w-36 rounded-full bg-amber-500/[0.02] blur-3xl pointer-events-none"></div>
+          <div>
+            <h3 className="text-xs font-bold text-[var(--gold)] uppercase tracking-widest font-mono mb-5 flex items-center gap-2 border-b border-neutral-900 pb-3">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              {language === 'ar' ? 'جدول الملائكة والرموز الكيميائية للمعادن' : 'CHEMICAL METAL ELEMENTS & SYMBOLS'}
+            </h3>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs font-mono">
+                <thead>
+                  <tr className="border-b border-neutral-850 text-neutral-500 text-[10px] uppercase font-bold">
+                    <th className={`pb-3 text-neutral-500 font-bold ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                      {language === 'ar' ? 'العنصر بالعربية' : 'Element (Arabic)'}
+                    </th>
+                    <th className={`pb-3 text-neutral-500 font-bold ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                      {language === 'ar' ? 'العنصر بالإنجليزية' : 'Element (English)'}
+                    </th>
+                    <th className="pb-3 text-center text-neutral-500 font-bold">
+                      {language === 'ar' ? 'الرمز الكيميائي' : 'Chemical Symbol'}
+                    </th>
+                    <th className={`pb-3 text-neutral-500 font-bold ${language === 'ar' ? 'text-left font-sans' : 'text-right font-sans'}`}>
+                      {language === 'ar' ? 'الاستخدام بالصاغة والتبكير والشيشنة' : 'Primary Application'}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-900/60 text-neutral-300">
+                  {[
+                    { ar: 'الذهب', en: 'Gold', symbol: 'Au', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20', useAr: 'المعدن الثمين الأساسي للتداول والادخار ومعيار التسعير اللحظي بالصاغة في مصر بمؤشر 875', useEn: 'Primary financial index base for trading & savings standard' },
+                    { ar: 'الفضة', en: 'Silver', symbol: 'Ag', color: 'text-slate-300 bg-slate-300/10 border-slate-300/20', useAr: 'معدن الخلط والمكمل للسبائك وخفض سهم الذهب للحصول للعيار المطلوب بدقة تامة', useEn: 'Pristine jewelry alloys, premium fineness calibration filler' },
+                    { ar: 'البلاتين', en: 'Platinum', symbol: 'Pt', color: 'text-teal-300 bg-teal-300/10 border-teal-300/20', useAr: 'صناعة محترفي المجوهرات الملكية والفاخرة شديدة النقاوة والصلابة والعمر المديد', useEn: 'High-end luxury jewelry, extreme durability' },
+                    { ar: 'البالاديوم', en: 'Palladium', symbol: 'Pd', color: 'text-indigo-300 bg-indigo-300/10 border-indigo-300/20', useAr: 'يدخل في صناعة سبائك الذهب الأبيض الفاخر وله رونق متين ومضاد للأكسدة والأحماض', useEn: 'White gold alloy manufacturing and hard coatings' },
+                    { ar: 'النحاس', en: 'Copper', symbol: 'Cu', color: 'text-orange-400 bg-orange-500/10 border-orange-500/20', useAr: 'المضاف الأقوى لتصليد عيار 21 وسهم 875 وصناعة الذهب الأحمر والوردي الفخم وسهم الخلط الناري', useEn: 'Primary hardening additive for yellow and rose gold alloys' },
+                    { ar: 'الرصاص', en: 'Lead', symbol: 'Pb', color: 'text-red-400 bg-red-500/10 border-red-500/20', useAr: 'عنصر مرسب ومجمع في تصفية المعادن الخام كيميائياً بالتثقيل وعزله تاماً لرفع جودة السهم ونقاء الذهب', useEn: 'Gathering agent in metallurgy crucible assaying' },
+                    { ar: 'الروديوم', en: 'Rhodium', symbol: 'Rh', color: 'text-cyan-300 bg-cyan-300/10 border-cyan-300/20', useAr: 'معدن ثمين نادر جداً لطلاء غلاف الذهب الأبيض لصد الخدوش وعكس اللمعان البلاتيني الفاخر', useEn: 'Ultra-rare platinum group metal used for premium alloy shielding' },
+                    { ar: 'التيتانيوم', en: 'Titanium', symbol: 'Ti', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', useAr: 'لصناعة المشغولات الطبية خفيفة الوزن وفائقة القوة والصمود ومقاومة التكلس والصدأ', useEn: 'Lightweight ultra-dense metal used in high-strength bespoke alloys' },
+                    { ar: 'النيكل', en: 'Nickel', symbol: 'Ni', color: 'text-purple-300 bg-purple-300/10 border-purple-300/20', useAr: 'يستخدم للحصول على تدرج الذهب الأبيض الفضي الفاخر والتصفيح المقاوم للمشغولات السطحية', useEn: 'White gold alloy catalyst and custom silver plating' },
+                    { ar: 'الزئبق', en: 'Mercury', symbol: 'Hg', color: 'text-sky-400 bg-sky-500/10 border-sky-500/20', useAr: 'مستخلص ومذيب حراري في تعدين الذهب واستخلاص الذهب الخام بالملغمة ثم التبخير بالورش الحرفية', useEn: 'Traditional gold ore extraction catalyst and ancient hot mining solvent' },
+                    { ar: 'الألومنيوم', en: 'Aluminum', symbol: 'Al', color: 'text-stone-300 bg-stone-300/10 border-stone-300/20', useAr: 'عنصر واقي وخافض للوزن الكلي يدخل في سبك قوالب صب العيار وهياكل معدات صهر المعادن الثمينة', useEn: 'Deoxidization component and structural assay crucible accessory' },
+                  ].map((item, idx) => (
+                    <tr key={idx} className="hover:bg-white/[0.01] transition-colors text-ellipsis">
+                      <td className={`py-3.5 font-bold text-neutral-100 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                        {item.ar}
+                      </td>
+                      <td className={`py-3.5 font-semibold text-neutral-300 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                        {item.en}
+                      </td>
+                      <td className="py-3.5 text-center">
+                        <span className={`inline-block px-3 py-1 rounded-md text-[11px] font-black border uppercase tracking-wider font-mono ${item.color}`}>
+                          {item.symbol}
+                        </span>
+                      </td>
+                      <td className={`py-3.5 text-[10px] text-neutral-500 font-sans ${language === 'ar' ? 'text-right leading-relaxed font-sans' : 'text-left leading-relaxed font-sans'}`}>
+                        {language === 'ar' ? item.useAr : item.useEn}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
 
+        {/* Right Side: Carats & Purity/Shares Table (5 cols) */}
+        <div className="lg:col-span-5 bento-card border border-neutral-850 bg-[#060709] relative overflow-hidden flex flex-col justify-between">
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 h-36 w-36 rounded-full bg-amber-500/[0.02] blur-3xl pointer-events-none"></div>
+          <div>
+            <h3 className="text-xs font-bold text-[var(--gold)] uppercase tracking-widest font-mono mb-5 flex items-center gap-2 border-b border-neutral-900 pb-3">
+              <Award className="h-4 w-4 text-amber-400" />
+              {language === 'ar' ? 'جدول أسهم ونقاوة عيارات الذهب (9K - 24K)' : 'GOLD CARAT SHARES & PURITY CHART (9K - 24K)'}
+            </h3>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs font-mono">
+                <thead>
+                  <tr className="border-b border-neutral-850 text-neutral-500 text-[10px] uppercase font-bold">
+                    <th className={`pb-3 text-neutral-500 font-bold ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                      {language === 'ar' ? 'العيار' : 'Karat'}
+                    </th>
+                    <th className="pb-3 text-center text-neutral-500 font-bold">
+                      {language === 'ar' ? 'الأسهم (من 1000)' : 'Shares (/1000)'}
+                    </th>
+                    <th className="pb-3 text-center text-neutral-500 font-bold">
+                      {language === 'ar' ? 'القراريط' : 'Karats'}
+                    </th>
+                    <th className={`pb-3 text-neutral-500 font-bold ${language === 'ar' ? 'text-left font-sans' : 'text-right font-sans'}`}>
+                      {language === 'ar' ? 'نسبة الذهب النقي' : 'Fine Gold %'}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-900/60 text-neutral-100">
+                  {[
+                    { karat: 24, shares: '1000', karats: '24.0 قيراط', pct: '100.00%' },
+                    { karat: 23, shares: '958.3', karats: '23.0 قيراط', pct: '95.83%' },
+                    { karat: 22, shares: '916.7', karats: '22.0 قيراط', pct: '91.67%' },
+                    { karat: 21, shares: '875.0', karats: '21.0 قيراط', pct: '87.50%' },
+                    { karat: 20, shares: '833.3', karats: '20.0 قيراط', pct: '83.33%' },
+                    { karat: 19, shares: '791.7', karats: '19.0 قيراط', pct: '79.17%' },
+                    { karat: 18, shares: '750.0', karats: '18.0 قيراط', pct: '75.00%' },
+                    { karat: 17, shares: '708.3', karats: '17.0 قيراط', pct: '70.83%' },
+                    { karat: 16, shares: '666.7', karats: '16.0 قيراط', pct: '66.67%' },
+                    { karat: 15, shares: '625.0', karats: '15.0 قيراط', pct: '62.50%' },
+                    { karat: 14, shares: '583.3', karats: '14.0 قيراط', pct: '58.33%' },
+                    { karat: 13, shares: '541.7', karats: '13.0 قيراط', pct: '54.17%' },
+                    { karat: 12, shares: '500.0', karats: '12.0 قيراط', pct: '50.00%' },
+                    { karat: 11, shares: '458.3', karats: '11.0 قيراط', pct: '45.83%' },
+                    { karat: 10, shares: '416.7', karats: '10.0 قيراط', pct: '41.67%' },
+                    { karat: 9, shares: '375.0', karats: '9.0 قيراط', pct: '37.50%' },
+                  ].map((item, idx) => (
+                    <tr key={idx} className="hover:bg-amber-500/[0.02] transition-colors leading-loose">
+                      <td className={`py-2 text-[11px] font-black ${language === 'ar' ? 'text-right text-amber-400' : 'text-left text-amber-400'}`}>
+                        {language === 'ar' ? `عيار ${item.karat}` : `${item.karat}K Gold`}
+                      </td>
+                      <td className="py-2 text-center text-white font-bold font-mono">
+                        {item.shares} <span className="text-[10px] text-neutral-500">{language === 'ar' ? 'سهم' : 'shares'}</span>
+                      </td>
+                      <td className="py-2 text-center text-neutral-400 font-semibold">
+                        {language === 'ar' ? item.karats : `${item.karat}.0 Karats`}
+                      </td>
+                      <td className={`py-2 text-[11px] font-mono font-black text-amber-500 ${language === 'ar' ? 'text-left font-sans' : 'text-right font-sans'}`}>
+                        {item.pct}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+      </div>
     </div>
   );
 };
