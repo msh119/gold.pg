@@ -82,6 +82,13 @@ export const translations = {
     fetchError: "فشل جلب الأسعار. تأكد من المفتاح أو اتصال الإنترنت.",
     apiPricingSection: "التسعير اللحظي التلقائي عبر API",
     apiPricingDesc: "قم بربط المنصة مباشرة بأسواق الذهب العالمية وتحديث الأسعار وفقاً لسعر السوق في مصر (ج.م) تلقائياً.",
+    adminPasscodeRequired: "الرمز السري للدخول مطلوب",
+    enterPasscode: "أدخل الرمز السري لدخول الإدارة والمشروع لـ \"قناة بيراميدز مالي الموحد مباشر\"",
+    passcodePlaceholder: "اكتب الرمز السري المخصص...",
+    passcodeError: "الرمز السري غير صحيح! يرجى إعادة المحاولة.",
+    loginButton: "تأكيد الدخول الآمن للوحة التحكم",
+    lockSystemLabel: "قفل النظام الآمن",
+    adminLock: "تسجيل الخروج والقفل",
   },
   en: {
     appName: "Pyramids Gold",
@@ -164,5 +171,12 @@ export const translations = {
     fetchError: "Failed to fetch prices. Check your API key or connection.",
     apiPricingSection: "Live API Automatic Pricing",
     apiPricingDesc: "Synchronize the platform with gold spot indices and automatically pull EGP averages from international bullion exchanges.",
+    adminPasscodeRequired: "Admin Passcode Required",
+    enterPasscode: "Enter the admin passcode to access \"Pyramids Gold Unified Studio\"",
+    passcodePlaceholder: "Enter secret passcode...",
+    passcodeError: "Incorrect passcode! Please try again.",
+    loginButton: "Verify & Launch Console",
+    lockSystemLabel: "Secure Lock System",
+    adminLock: "Logout & Secure Lock",
   }
 };

@@ -113,10 +113,24 @@ body {
   animation: marquee-rtl 45s linear infinite;
 }
 
+.animate-marquee-slow {
+  display: flex;
+  width: max-content;
+  animation: marquee 160s linear infinite;
+}
+
+.animate-marquee-slow-rtl {
+  display: flex;
+  width: max-content;
+  animation: marquee-rtl 160s linear infinite;
+}
+
 .hover-pause:hover .animate-marquee,
 .hover-pause:hover .animate-marquee-rtl,
 .hover-pause:hover .animate-marquee-fast,
-.hover-pause:hover .animate-marquee-fast-rtl {
+.hover-pause:hover .animate-marquee-fast-rtl,
+.hover-pause:hover .animate-marquee-slow,
+.hover-pause:hover .animate-marquee-slow-rtl {
   animation-play-state: paused;
 }
 

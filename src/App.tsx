@@ -8,6 +8,7 @@ import { SystemInfo } from './components/SystemInfo';
 import { HomeDashboard } from './components/HomeDashboard';
 import { FloatingCaratCard } from './components/FloatingCaratCard';
 import { BottomMarketTicker } from './components/BottomMarketTicker';
+import { AdminGate } from './components/AdminGate';
 import { ActiveTab, GoldPrices, Language, HistoryItem, TickerSettings } from './types';
 import { translations } from './utils/translations';
 import { motion, AnimatePresence } from 'motion/react';
@@ -36,6 +37,30 @@ const DEFAULT_TICKER_SETTINGS: TickerSettings = {
 };
 
 export default function App() {
+  // Passcode gate state (password is mas2026)
+  const [isUnlocked, setIsUnlocked] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('pyramids_lock_unlocked') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleUnlock = () => {
+    setIsUnlocked(true);
+    try {
+      localStorage.setItem('pyramids_lock_unlocked', 'true');
+    } catch {}
+  };
+
+  const handleLock = () => {
+    setIsUnlocked(false);
+    try {
+      localStorage.setItem('pyramids_lock_unlocked', 'false');
+    } catch {}
+    setActiveTab('home');
+  };
+
   // Safe load of prices
   const [prices, setPrices] = useState<GoldPrices>(() => {
     try {
@@ -134,12 +159,8 @@ export default function App() {
     // 2. Fetch live gold rates using the preconfigured/saved Key via GoldAPI (prone to CORS/Rate-limit failures)
     try {
       const apiKey = localStorage.getItem('goldapi_key') || 'goldapi-d403eb25233852441e428c300695afdf-io';
-      const goldRes = await fetch('https://www.goldapi.io/api/XAU/EGP', {
-        headers: {
-          'x-access-token': apiKey.trim(),
-          'Content-Type': 'application/json'
-        }
-      });
+      const proxyEgpUrl = `/api/goldapi-proxy?currency=EGP&key=${encodeURIComponent(apiKey.trim())}`;
+      const goldRes = await fetch(proxyEgpUrl);
 
       if (goldRes.ok) {
         const goldData = await goldRes.json();
@@ -155,9 +176,8 @@ export default function App() {
           globalOunceVal = Math.round(goldData.price / (p24 ? (goldData.price_gram_24k ? goldData.price / p24 : calculatedEgpRate) : calculatedEgpRate) * 31.1034768);
           try {
             // Standard estimation of golden ounce global value from Troy ounce directly
-            const ounceRes = await fetch('https://www.goldapi.io/api/XAU/USD', {
-              headers: { 'x-access-token': apiKey.trim() }
-            });
+            const proxyUsdUrl = `/api/goldapi-proxy?currency=USD&key=${encodeURIComponent(apiKey.trim())}`;
+            const ounceRes = await fetch(proxyUsdUrl);
             if (ounceRes.ok) {
               const ounceData = await ounceRes.json();
               if (ounceData.price) globalOunceVal = Math.round(ounceData.price);
@@ -323,6 +343,7 @@ export default function App() {
             tickerSettings={tickerSettings}
             saveTickerSettings={saveTickerSettings}
             fetchLiveTickerData={fetchLiveTickerData}
+            onLock={handleLock}
           />
         );
       case 'info':
@@ -340,6 +361,16 @@ export default function App() {
         );
     }
   };
+
+  if (!isUnlocked) {
+    return (
+      <AdminGate 
+        language={language} 
+        onSetLanguage={handleSetLanguage} 
+        onUnlock={handleUnlock} 
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#070707] text-neutral-100 selection:bg-yellow-500/20 selection:text-yellow-400 relative overflow-hidden">

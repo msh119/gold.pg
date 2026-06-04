@@ -3,6 +3,8 @@ import { GoldPrices, Language, TickerSettings } from '../types';
 import { translations } from '../utils/translations';
 import { Sliders, Save, RotateCcw, TrendingUp, AlertCircle, Sparkles, Globe, RefreshCw, Loader2, Check, Coins } from 'lucide-react';
 
+import { ShieldAlert, LogOut } from 'lucide-react';
+
 interface SettingsProps {
   prices: GoldPrices;
   savePrices: (prices: GoldPrices) => void;
@@ -10,6 +12,7 @@ interface SettingsProps {
   tickerSettings: TickerSettings;
   saveTickerSettings: (settings: TickerSettings) => void;
   fetchLiveTickerData: () => Promise<void>;
+  onLock?: () => void;
 }
 
 export const Settings: React.FC<SettingsProps> = ({ 
@@ -18,7 +21,8 @@ export const Settings: React.FC<SettingsProps> = ({
   language,
   tickerSettings,
   saveTickerSettings,
-  fetchLiveTickerData
+  fetchLiveTickerData,
+  onLock
 }) => {
   const t = translations[language];
 
@@ -86,13 +90,8 @@ export const Settings: React.FC<SettingsProps> = ({
       localStorage.setItem('goldapi_currency', apiCurrency);
       localStorage.setItem('goldapi_usd_to_egp', usdToEgpRate);
 
-      const response = await fetch(`https://www.goldapi.io/api/XAU/${apiCurrency}`, {
-        method: 'GET',
-        headers: {
-          'x-access-token': apiKey.trim(),
-          'Content-Type': 'application/json'
-        }
-      });
+      const proxyUrl = `/api/goldapi-proxy?currency=${apiCurrency}&key=${encodeURIComponent(apiKey.trim())}`;
+      const response = await fetch(proxyUrl);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -148,7 +147,7 @@ export const Settings: React.FC<SettingsProps> = ({
       }
 
     } catch (err: any) {
-      console.error('GoldAPI fetch failed:', err);
+      console.warn('GoldAPI fetch failed gracefully:', err);
       setApiError(language === 'ar' 
         ? 'فشل جلب الأسعار اللحظية. تأكد من صحة المفتاح، أو حصة الاستهلاك المتبقية، أو ربط الشبكة.' 
         : 'Failed to access live rates. Please verify your API Key, account quota, or network connection.'
@@ -807,6 +806,31 @@ export const Settings: React.FC<SettingsProps> = ({
                 <span className="font-mono text-xs font-bold text-orange-400">750/1000 {t.shares}</span>
               </div>
             </div>
+
+            {/* Premium Secure Lock Card */}
+            {onLock && (
+              <div className="rounded-xl border border-dashed border-amber-600/20 bg-neutral-950 p-4 mt-2 space-y-3.5">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-amber-500 animate-pulse" />
+                  <span className="text-xs font-bold text-neutral-200">
+                    {t.lockSystemLabel}
+                  </span>
+                </div>
+                <p className="text-[10px] text-neutral-500 leading-relaxed">
+                  {language === 'ar'
+                    ? 'تسجيل الخروج الفوري وإعادة قفل المنصة بالكامل، ستحتاج لإدخال الرمز السري mas2026 مرة أخرى للولوج.'
+                    : 'Log out and lock entire environment immediately. You will need to type mas2026 passcode again to enter.'}
+                </p>
+                <button
+                  type="button"
+                  onClick={onLock}
+                  className="w-full py-2.5 bg-red-950/40 hover:bg-red-900/40 border border-red-900/30 hover:border-red-500 text-rose-300 hover:text-white text-xs font-bold flex items-center justify-center gap-1.5 rounded-lg transition-all duration-200 cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>{t.adminLock}</span>
+                </button>
+              </div>
+            )}
 
             <div className="mt-auto pt-6 text-[10px] leading-relaxed text-neutral-500 border-t border-neutral-900">
               {language === 'ar' 
