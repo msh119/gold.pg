@@ -396,6 +396,7 @@ export default function App() {
           setLanguage={handleSetLanguage} 
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          onLock={handleLock}
         />
       </div>
 

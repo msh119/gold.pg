@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActiveTab, GoldPrices, Language } from '../types';
 import { translations } from '../utils/translations';
-import { Coins, Globe, TrendingUp, Sliders } from 'lucide-react';
+import { Coins, Globe, TrendingUp, Sliders, LogOut } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface HeaderProps {
@@ -10,6 +10,7 @@ interface HeaderProps {
   setLanguage: (lang: Language) => void;
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
+  onLock: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -17,7 +18,8 @@ export const Header: React.FC<HeaderProps> = ({
   language, 
   setLanguage,
   activeTab,
-  setActiveTab
+  setActiveTab,
+  onLock
 }) => {
   const t = translations[language];
 
@@ -128,19 +130,15 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
           </div>
 
-          {/* Price Settings Icon Button */}
+          {/* Log Out Button */}
           <button
-            onClick={() => setActiveTab('settings')}
-            className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-all cursor-pointer ${
-              activeTab === 'settings'
-                ? 'border-blue-500 bg-blue-500/15 text-blue-400 shadow-md shadow-blue-500/10'
-                : 'border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-blue-500/40 hover:text-blue-300 hover:bg-neutral-850'
-            }`}
-            title={t.settingsTab}
-            aria-label={t.settingsTab}
-            id="header-price-settings-btn"
+            onClick={onLock}
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-950 bg-red-950/20 text-rose-400 hover:text-white hover:bg-red-900/30 hover:border-red-500/50 transition-all cursor-pointer shadow-sm hover:shadow-red-950/40"
+            title={t.adminLock}
+            aria-label={t.adminLock}
+            id="header-logout-btn"
           >
-            <Sliders className="h-4 w-4" />
+            <LogOut className="h-4 w-4" />
           </button>
 
           <button
