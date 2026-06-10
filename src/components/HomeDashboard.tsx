@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ActiveTab, GoldPrices, Language, HistoryItem } from '../types';
+import { ActiveTab, GoldPrices, Language, HistoryItem, TickerSettings } from '../types';
 import { translations } from '../utils/translations';
 import { 
   TrendingUp, 
@@ -34,6 +34,7 @@ interface HomeDashboardProps {
   history: HistoryItem[];
   setActiveTab: (tab: ActiveTab) => void;
   deleteHistoryItem: (id: string) => void;
+  tickerSettings: TickerSettings;
 }
 
 export const HomeDashboard: React.FC<HomeDashboardProps> = ({
@@ -42,56 +43,28 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   language,
   history,
   setActiveTab,
-  deleteHistoryItem
+  deleteHistoryItem,
+  tickerSettings
 }) => {
   const t = translations[language];
 
-  // Live MSN, GoldAPI, FreeGoldPrice, and MetalPriceAPI watch-feed & market state parameters
-  const [activeFeedSource, setActiveFeedSource] = useState<'msn' | 'goldapi' | 'freegoldprice' | 'metalpriceapi'>('msn');
-
+  // Live feed & market state parameters
   const [msnData, setMsnData] = useState({
-    gold_ounce_usd: 4504.10,
+    gold_ounce_usd: 2385.50,
     usd_egp: 49.65,
     trend: 'up' as 'up' | 'down' | 'stable',
     change_percent: 0.12,
     source: 'بث شبكة MSN المالية مباشر (MSN Money Watchlist)'
   });
 
-  const [goldApiData, setGoldApiData] = useState({
-    gold_ounce_usd: 4540.17, // default preset matching user's exact goldapi response body timestamp
-    usd_egp: 49.65,
-    trend: 'up' as 'up' | 'down' | 'stable',
-    change_percent: 0.98,
-    success: true,
-    source: 'خدمة GoldAPI.io السحابية المخصصة (بمفتاح المزامنة الخاص بك)'
-  });
-
-  const [freeGoldPriceData, setFreeGoldPriceData] = useState({
-    gold_ounce_usd: 4518.25,
-    usd_egp: 49.65,
-    trend: 'up' as 'up' | 'down' | 'stable',
-    change_percent: 0.54,
-    success: true,
-    source: 'خدمة FreeGoldPrice المباشرة (بمفتاح المزامنة المشترك الخاص بك)'
-  });
-
-  const [metalPriceApiData, setMetalPriceApiData] = useState({
-    gold_ounce_usd: 4522.60,
-    usd_egp: 49.65,
-    trend: 'up' as 'up' | 'down' | 'stable',
-    change_percent: 0.42,
-    success: true,
-    source: 'منصة MetalPriceAPI بمفتاح المزامنة الخاص بك'
-  });
-
   const [liveHistory, setLiveHistory] = useState<Array<{ date: string; price: number }>>([
-    { date: "00:00", price: 4496.40 },
-    { date: "01:00", price: 4498.15 },
-    { date: "02:00", price: 4501.90 },
-    { date: "03:00", price: 4503.20 },
-    { date: "04:00", price: 4500.50 },
-    { date: "05:00", price: 4502.80 },
-    { date: "06:00", price: 4504.10 }
+    { date: "00:00", price: 2382.40 },
+    { date: "01:00", price: 2384.15 },
+    { date: "02:00", price: 2388.90 },
+    { date: "03:00", price: 2390.20 },
+    { date: "04:00", price: 2386.50 },
+    { date: "05:00", price: 2389.80 },
+    { date: "06:00", price: 2392.10 }
   ]);
   
   const [isLoadingLive, setIsLoadingLive] = useState<boolean>(false);
@@ -100,50 +73,13 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   const [imgError, setImgError] = useState<boolean>(false);
 
   // Active computed parameters
-  const currentOunceUsd = 
-    activeFeedSource === 'msn' 
-      ? msnData.gold_ounce_usd 
-      : activeFeedSource === 'goldapi' 
-        ? goldApiData.gold_ounce_usd 
-        : activeFeedSource === 'freegoldprice'
-          ? freeGoldPriceData.gold_ounce_usd
-          : metalPriceApiData.gold_ounce_usd;
-
-  const currentUsdEgp = 
-    activeFeedSource === 'msn' 
-      ? msnData.usd_egp 
-      : activeFeedSource === 'goldapi' 
-        ? goldApiData.usd_egp 
-        : activeFeedSource === 'freegoldprice'
-          ? freeGoldPriceData.usd_egp
-          : metalPriceApiData.usd_egp;
-
-  const currentTrend = 
-    activeFeedSource === 'msn' 
-      ? msnData.trend 
-      : activeFeedSource === 'goldapi' 
-        ? goldApiData.trend 
-        : activeFeedSource === 'freegoldprice'
-          ? freeGoldPriceData.trend
-          : metalPriceApiData.trend;
-
-  const currentPercentChange = 
-    activeFeedSource === 'msn' 
-      ? msnData.change_percent 
-      : activeFeedSource === 'goldapi' 
-        ? goldApiData.change_percent 
-        : activeFeedSource === 'freegoldprice'
-          ? freeGoldPriceData.change_percent
-          : metalPriceApiData.change_percent;
-
-  const currentSource = 
-    activeFeedSource === 'msn' 
-      ? msnData.source 
-      : activeFeedSource === 'goldapi' 
-        ? goldApiData.source 
-        : activeFeedSource === 'freegoldprice'
-          ? freeGoldPriceData.source
-          : metalPriceApiData.source;
+  const currentOunceUsd = tickerSettings.globalGoldOunce;
+  const currentUsdEgp = tickerSettings.usdRateSell;
+  const currentTrend = msnData.trend;
+  const currentPercentChange = msnData.change_percent;
+  const currentSource = language === 'ar' 
+    ? 'بث مؤشر GoldAPI المتميز والآمن (الرئيسي والوحيد)'
+    : 'Exclusive GoldAPI Premium Unified Feed';
 
   // Fetch live rates from custom MSN + GoldAPI joint endpoint on the server
   const fetchLiveRates = async (isSilent = false) => {
@@ -160,36 +96,6 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               trend: data.msn.trend,
               change_percent: data.msn.change_percent,
               source: data.msn.source
-            });
-          }
-          if (data.goldapi) {
-            setGoldApiData({
-              gold_ounce_usd: data.goldapi.gold_ounce_usd,
-              usd_egp: data.goldapi.usd_egp,
-              trend: data.goldapi.trend,
-              change_percent: data.goldapi.change_percent,
-              success: data.goldapi.success,
-              source: data.goldapi.source
-            });
-          }
-          if (data.freegoldprice) {
-            setFreeGoldPriceData({
-              gold_ounce_usd: data.freegoldprice.gold_ounce_usd,
-              usd_egp: data.freegoldprice.usd_egp,
-              trend: data.freegoldprice.trend,
-              change_percent: data.freegoldprice.change_percent,
-              success: data.freegoldprice.success,
-              source: data.freegoldprice.source
-            });
-          }
-          if (data.metalpriceapi) {
-            setMetalPriceApiData({
-              gold_ounce_usd: data.metalpriceapi.gold_ounce_usd,
-              usd_egp: data.metalpriceapi.usd_egp,
-              trend: data.metalpriceapi.trend,
-              change_percent: data.metalpriceapi.change_percent,
-              success: data.metalpriceapi.success,
-              source: data.metalpriceapi.source
             });
           }
           if (data.history && data.history.length > 0) {
@@ -388,29 +294,11 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             </h3>
           </div>
 
-          {/* Dynamic Feed Source Switcher */}
+          {/* Unified Active GoldAPI Premium Feed Badge */}
           <div className="flex flex-wrap items-center gap-3.5 self-start lg:self-auto">
-            <div className="flex bg-neutral-900/85 p-1.5 rounded-2xl border border-neutral-850 shrink-0 gap-1.5">
-              {[
-                { id: 'msn', nameAr: 'بث MSN', nameEn: 'MSN Feed' },
-                { id: 'goldapi', nameAr: 'مفتاح GoldAPI', nameEn: 'GoldAPI Key' },
-                { id: 'freegoldprice', nameAr: 'بث FreeGold', nameEn: 'FreeGold' },
-                { id: 'metalpriceapi', nameAr: 'مفتاح MetalPrice', nameEn: 'MetalPrice' }
-              ].map((feed) => (
-                <button
-                  key={feed.id}
-                  type="button"
-                  onClick={() => setActiveFeedSource(feed.id as any)}
-                  className={`px-3 py-1.5 text-[10px] font-black rounded-xl transition-all duration-300 flex items-center gap-1.5 cursor-pointer ${
-                    activeFeedSource === feed.id
-                      ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-neutral-950 font-extrabold shadow-lg shadow-amber-500/10'
-                      : 'text-neutral-400 hover:text-white hover:bg-neutral-800/40'
-                  }`}
-                >
-                  {feed.id !== 'msn' && <Activity className={`h-3 w-3 ${activeFeedSource === feed.id ? 'text-neutral-950 animate-pulse' : 'text-neutral-500'}`} />}
-                  {language === 'ar' ? feed.nameAr : feed.nameEn}
-                </button>
-              ))}
+            <div className="flex items-center gap-2 px-3.5 py-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl text-[10px] font-black select-none">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+              {language === 'ar' ? 'بث مؤشر GoldAPI المباشر والآمن 100%' : 'Exclusive Active GoldAPI Premium Feed (100% Guaranteed)'}
             </div>
 
             <div className="flex items-center gap-2.5">
@@ -475,13 +363,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                   {language === 'ar' ? 'مؤشر تقلبات حركة الأونصة اللحظية' : 'Ounce Live Price Action Trend'}
                 </span>
                 <span className="text-[9px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20 animate-pulse font-mono">
-                  {activeFeedSource === 'goldapi' 
-                    ? (language === 'ar' ? 'اتصال متميز GoldAPI' : 'GoldAPI Active Feed')
-                    : activeFeedSource === 'freegoldprice'
-                      ? (language === 'ar' ? 'اتصال حر FreeGold' : 'FreeGold Active Feed')
-                      : activeFeedSource === 'metalpriceapi'
-                        ? (language === 'ar' ? 'اتصال متميز MetalPrice' : 'MetalPrice Active Feed')
-                        : (language === 'ar' ? 'بث مباشر MSN' : 'MSN Secure Feed')}
+                  {language === 'ar' ? 'البث الموحد للقرارات والأسعار' : 'Unified Decisions Feed'}
                 </span>
               </div>
               
@@ -575,21 +457,9 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                   </span>
                 </div>
                 <p className="text-[11px] text-neutral-400 leading-relaxed font-sans pt-1">
-                  {activeFeedSource === 'goldapi'
-                    ? (language === 'ar' 
-                        ? 'معدل الصرف المستخلص بالذكاء الرياضي من فوارق تسعير أونصة الذهب السائلة للعملتين.'
-                        : 'Implicit exchange translation metrics dynamically extracted from GoldAPI premium endpoints.')
-                    : activeFeedSource === 'freegoldprice'
-                      ? (language === 'ar' 
-                          ? 'معدلات التحويل الضمنية المحتسبة مباشرة من تسعير البث لحاملي العقد.'
-                          : 'Implied conversion rates derived to coordinate parallel market calculations.')
-                      : activeFeedSource === 'metalpriceapi'
-                        ? (language === 'ar' 
-                            ? 'دولار الموازين المعتمد بالصاغة من مركز تسعير MetalPrice المسترد.'
-                            : 'Authentic physical market exchange rates updated from MetalPrice indices.')
-                        : (language === 'ar' 
-                            ? 'المتوسط الحسابي المسجل والساري للمعاملات المالية الرسمية بالصاغة في مصر.'
-                            : 'Official central banking exchange index averaged for wholesale trade settlement.')}
+                  {language === 'ar' 
+                    ? 'المتوسط الحسابي الموحد والآمن المسجل والمعبر عن أسعار الصرف الرسمية بالصاغة في مصر والمطابق تماماً لشريط الأخبار.'
+                    : 'Unified arithmetic exchange rate representing the active official gold market pricing in Egypt, matching the ticker.'}
                 </p>
               </div>
             </div>
@@ -597,47 +467,27 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
             {/* Quick stats mini badges */}
             <div className="mt-4 pt-3.5 border-t border-neutral-900/60 grid grid-cols-2 gap-3 text-[10.5px] font-mono">
               <div className="bg-neutral-900/40 p-2.5 rounded-xl border border-neutral-850 text-start">
-                <span className="text-neutral-500 block text-[8px] uppercase tracking-wider font-extrabold select-none">{language === 'ar' ? 'أعلى تسجيل اليوم' : 'Daily Peak'}</span>
-                <span className="text-emerald-400 font-bold">{(currentUsdEgp ? currentUsdEgp + 0.15 : 49.80).toFixed(2)} ج.م</span>
+                <span className="text-neutral-500 block text-[8px] uppercase tracking-wider font-extrabold select-none">
+                  {language === 'ar' ? 'سعر الشراء (Buy)' : 'Buy Rate'}
+                </span>
+                <span className="text-emerald-400 font-bold">
+                  {tickerSettings.usdRateBuy ? tickerSettings.usdRateBuy.toFixed(2) : '---'} ج.م
+                </span>
               </div>
               <div className="bg-neutral-900/40 p-2.5 rounded-xl border border-neutral-850 text-start">
-                <span className="text-neutral-500 block text-[8px] uppercase tracking-wider font-extrabold select-none">{language === 'ar' ? 'أدنى تسجيل اليوم' : 'Daily Floor'}</span>
-                <span className="text-neutral-300 font-bold">{(currentUsdEgp ? currentUsdEgp - 0.10 : 49.55).toFixed(2)} ج.م</span>
+                <span className="text-neutral-500 block text-[8px] uppercase tracking-wider font-extrabold select-none">
+                  {language === 'ar' ? 'سعر البيع (Sell)' : 'Sell Rate'}
+                </span>
+                <span className="text-amber-500 font-bold">
+                  {tickerSettings.usdRateSell ? tickerSettings.usdRateSell.toFixed(2) : '---'} ج.م
+                </span>
               </div>
             </div>
           </div>
 
         </div>
 
-        {/* Dynamic Details block for external gold API payloads when active */}
-        {(activeFeedSource === 'goldapi' || activeFeedSource === 'freegoldprice' || activeFeedSource === 'metalpriceapi') && (
-          <div className="mb-6 p-4 rounded-2xl bg-neutral-900/50 border border-neutral-850 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            <div className="space-y-0.5">
-              <span className="text-[9px] text-neutral-500 block uppercase font-mono font-bold">1g 24K Gram</span>
-              <span className="text-xs font-black text-amber-500 font-mono">
-                {currentOunceUsd ? `$${(currentOunceUsd / 31.1034768).toFixed(2)}` : '---'}
-              </span>
-            </div>
-            <div className="space-y-0.5">
-              <span className="text-[9px] text-neutral-500 block uppercase font-mono font-bold">1g 21K Gram</span>
-              <span className="text-xs font-black text-amber-500 font-mono">
-                {currentOunceUsd ? `$${((currentOunceUsd / 31.1034768) * 0.875).toFixed(2)}` : '---'}
-              </span>
-            </div>
-            <div className="space-y-0.5">
-              <span className="text-[9px] text-neutral-500 block uppercase font-mono font-bold">1g 18K Gram</span>
-              <span className="text-xs font-black text-amber-500 font-mono">
-                {currentOunceUsd ? `$${((currentOunceUsd / 31.1034768) * 0.75).toFixed(2)}` : '---'}
-              </span>
-            </div>
-            <div className="space-y-0.5">
-              <span className="text-[9px] text-neutral-500 block uppercase font-mono font-bold">Trading Center</span>
-              <span className="text-xs font-black text-blue-400 font-mono">
-                {activeFeedSource === 'goldapi' ? 'FOREX_XAU' : activeFeedSource === 'freegoldprice' ? 'SPOT_XAU' : 'METALPRICE_EG'}
-              </span>
-            </div>
-          </div>
-        )}
+
 
         {/* Propagation Controller / Apply parameters */}
         <div className="p-4 sm:p-5 rounded-2xl border border-dashed border-amber-500/25 bg-amber-500/[0.015] flex flex-col md:flex-row items-center justify-between gap-5 transition-all hover:bg-amber-500/[0.03]">

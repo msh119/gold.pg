@@ -114,12 +114,41 @@ export default function App() {
     let globalOunceVal = tickerSettings.globalGoldOunce;
     let calculatedEgpRate = tickerSettings.usdRateSell;
 
+    // Prefetch live rate from our GoldAPI-supported backend endpoint first
+    try {
+      const resLive = await fetch('/api/live-rates');
+      if (resLive.ok) {
+        const liveData = await resLive.json();
+        if (liveData.success && liveData.gold_ounce_usd && liveData.usd_egp) {
+          globalOunceVal = liveData.gold_ounce_usd;
+          calculatedEgpRate = liveData.usd_egp;
+
+          // Double security: compute and save gram prices immediately from the guaranteed server stream
+          const p24 = (globalOunceVal / 31.1034768) * calculatedEgpRate;
+          const p21 = p24 * 0.875;
+          const p18 = p24 * 0.75;
+
+          savePrices({
+            g24: Math.round(p24 * 100) / 100,
+            g21: Math.round(p21 * 100) / 100,
+            g18: Math.round(p18 * 100) / 100
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Unable to prefetch GoldAPI live-rates:', e);
+    }
+
     // 1. Fetch live keyless exchange rates relative to USD (USD standard rates)
     try {
       const res = await fetch('https://open.er-api.com/v6/latest/USD');
       if (res.ok) {
         const data = await res.json();
-        calculatedEgpRate = data.rates.EGP || 49.75;
+        
+        // If server failed, fall back to ER API rate
+        if (!calculatedEgpRate) {
+          calculatedEgpRate = data.rates.EGP || 49.75;
+        }
         
         const getRateInEgp = (code: string, fallback: number) => {
           const rateToUsd = data.rates[code];
@@ -135,8 +164,21 @@ export default function App() {
         const aedVal = getRateInEgp('AED', 13.53);
         const kwdVal = getRateInEgp('KWD', 161.80);
 
-        if (data.rates.XAU) {
+        if (data.rates.XAU && !globalOunceVal) {
           globalOunceVal = Math.round(1 / data.rates.XAU);
+        }
+
+        // Standard evaluation: Gold 24K Gram Price in EGP = (OuncePrice / 31.1034768) * EGPRate
+        if (globalOunceVal) {
+          const p24 = (globalOunceVal / 31.1034768) * calculatedEgpRate;
+          const p21 = p24 * 0.875;
+          const p18 = p24 * 0.75;
+
+          savePrices({
+            g24: Math.round(p24 * 100) / 100,
+            g21: Math.round(p21 * 100) / 100,
+            g18: Math.round(p18 * 100) / 100
+          });
         }
 
         loadedCurrencies = {
@@ -154,56 +196,6 @@ export default function App() {
       }
     } catch (currencyErr) {
       console.warn('Unable to sync standard currency conversion ratios:', currencyErr);
-    }
-
-    // 2. Fetch live gold rates using the preconfigured/saved Key via GoldAPI (prone to CORS/Rate-limit failures)
-    try {
-      const apiKey = localStorage.getItem('goldapi_key') || 'goldapi-d403eb25233852441e428c300695afdf-io';
-      const proxyEgpUrl = `/api/goldapi-proxy?currency=EGP&key=${encodeURIComponent(apiKey.trim())}`;
-      const goldRes = await fetch(proxyEgpUrl);
-
-      if (goldRes.ok) {
-        const goldData = await goldRes.json();
-        let p24 = goldData.price_gram_24k;
-        let p21 = goldData.price_gram_21k;
-        let p18 = goldData.price_gram_18k;
-
-        if (!p24 && goldData.price) {
-          p24 = goldData.price / 31.1034768;
-        }
-
-        if (goldData.price && calculatedEgpRate) {
-          globalOunceVal = Math.round(goldData.price / (p24 ? (goldData.price_gram_24k ? goldData.price / p24 : calculatedEgpRate) : calculatedEgpRate) * 31.1034768);
-          try {
-            // Standard estimation of golden ounce global value from Troy ounce directly
-            const proxyUsdUrl = `/api/goldapi-proxy?currency=USD&key=${encodeURIComponent(apiKey.trim())}`;
-            const ounceRes = await fetch(proxyUsdUrl);
-            if (ounceRes.ok) {
-              const ounceData = await ounceRes.json();
-              if (ounceData.price) globalOunceVal = Math.round(ounceData.price);
-            }
-          } catch (ounceErr) {
-            // Nested error bypass
-          }
-        }
-
-        if (p24) {
-          if (!p21) p21 = p24 * 0.875;
-          if (!p18) p18 = p24 * 0.75;
-
-          const r24 = Math.round(p24 * 100) / 100;
-          const r21 = Math.round(p21 * 100) / 100;
-          const r18 = Math.round(p18 * 100) / 100;
-
-          savePrices({
-            g24: r24,
-            g21: r21,
-            g18: r18
-          });
-        }
-      }
-    } catch (goldApiErr) {
-      console.warn('Unable to retrieve direct GoldAPI pricing indices (using cache/server proxy fallback):', goldApiErr);
     }
 
     // Update ticker settings values with any newly fetched or cached parameters safely
@@ -321,6 +313,7 @@ export default function App() {
             history={history}
             setActiveTab={setActiveTab}
             deleteHistoryItem={handleDeleteHistoryItem}
+            tickerSettings={tickerSettings}
           />
         );
       case 'calculator':

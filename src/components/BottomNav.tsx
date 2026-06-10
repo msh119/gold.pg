@@ -16,25 +16,25 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab, l
   const menuItems = [
     {
       id: 'home' as ActiveTab,
-      label: language === 'ar' ? 'الرئيسية' : 'Dashboard',
+      label: language === 'ar' ? t.homeTab : 'Dashboard',
       icon: Home,
       glowColor: 'rgba(245, 158, 11, 0.4)', // Amber gold
     },
     {
       id: 'calculator' as ActiveTab,
-      label: language === 'ar' ? 'الحاسبة' : 'Calculator',
+      label: language === 'ar' ? t.calculatorTab : 'Calculator',
       icon: Calculator,
       glowColor: 'rgba(217, 119, 6, 0.4)', // Deep Gold
     },
     {
       id: 'info' as ActiveTab,
-      label: language === 'ar' ? 'ذكاء السيرفرات' : 'AI & Systems',
+      label: language === 'ar' ? t.infoTab : 'Guidelines',
       icon: Cpu,
       glowColor: 'rgba(34, 211, 238, 0.4)', // Cyan smart
     },
     {
       id: 'settings' as ActiveTab,
-      label: language === 'ar' ? 'الأسعار' : 'Rates Config',
+      label: language === 'ar' ? t.settingsTab : 'Rates Config',
       icon: Settings,
       glowColor: 'rgba(239, 68, 68, 0.4)', // Hot Red
     },
